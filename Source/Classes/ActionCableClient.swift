@@ -217,7 +217,7 @@ extension ActionCableClient {
     }
     
     /// Create and subscribe to a channel.
-    /// 
+    ///
     /// - Parameters:
     ///     - name: The name of the channel. The name must match the class name on the server exactly. (e.g. RoomChannel)
     ///     - identifier: An optional Dictionary with parameters to be passed into the Channel on each request
@@ -225,7 +225,7 @@ extension ActionCableClient {
     /// - Returns: a Channel
     
     public func create(_ name: String, identifier: ChannelIdentifier?, autoSubscribe: Bool=true, bufferActions: Bool=true) -> Channel {
-		
+        
         var channelUID = name
         
         //if identifier isn't empty, fetch the first value as the channel unique identifier
@@ -236,7 +236,7 @@ extension ActionCableClient {
         }
         channelUID = identifier
       }
-		
+        
         // Look in existing channels and return that
         if let channel = channels[channelUID] { return channel }
         
@@ -434,7 +434,7 @@ extension ActionCableClient {
                 }
             case .message:
                 if let channelName = message.channelName,
-                  let channel = channels[channelName] {
+                    let channel = channels[channelName] {
                     // Notify Channel
                     channel.onMessage(message)
                     
@@ -443,44 +443,71 @@ extension ActionCableClient {
                     }
                 }
             case .confirmSubscription:
-                if let channelName = message.channelName,
-                  let channel = unconfirmedChannels.removeValue(forKey: channelName) {
-                    self.channels.updateValue(channel, forKey: channel.uid)
-                    
-                    // Notify Channel
-                    channel.onMessage(message)
-                    
-                    if let callback = onChannelSubscribed {
-                        DispatchQueue.main.async(execute: { callback(channel) })
+                ActionCableSerialQueue.async {
+                    if let channelName = message.channelName,
+                       let channel = self.unconfirmedChannels.removeValue(forKey: channelName) {
+                        self.channels.updateValue(channel, forKey: channel.uid)
+                        
+                        ActionCableConcurrentQueue.async {
+                            // Notify Channel
+                            channel.onMessage(message)
+                        }
+                        
+                        
+                        if let callback = self.onChannelSubscribed {
+                            DispatchQueue.main.async(execute: { callback(channel) })
+                        }
                     }
                 }
             case .rejectSubscription:
-                // Remove this channel from the list of unconfirmed subscriptions
-                if let channel = unconfirmedChannels.removeValue(forKey: message.channelName!) {
-                    
-                    // Notify Channel
-                    channel.onMessage(message)
-                    
-                    if let callback = onChannelRejected {
-                        DispatchQueue.main.async(execute: { callback(channel) })
+                ActionCableSerialQueue.async {
+                    // Remove this channel from the list of unconfirmed subscriptions
+                    if let channel = self.unconfirmedChannels.removeValue(forKey: message.channelName!) {
+                        
+                        ActionCableConcurrentQueue.async {
+                            // Notify Channel
+                            channel.onMessage(message)
+                        }
+                        
+                        if let callback = self.onChannelRejected {
+                            DispatchQueue.main.async(execute: { callback(channel) })
+                        }
                     }
                 }
             case .hibernateSubscription:
-              if let channel = channels.removeValue(forKey: message.channelName!) {
-                // Add channel into unconfirmed channels
-                unconfirmedChannels[channel.uid] = channel
-                
-                // We want to treat this like an unsubscribe.
-                fallthrough
-              }
+                ActionCableSerialQueue.async {
+                    if let channel = self.channels.removeValue(forKey: message.channelName!) {
+                        // Add channel into unconfirmed channels
+                        self.unconfirmedChannels[channel.uid] = channel
+                        
+                        // We want to treat this like an unsubscribe.
+                        ActionCableSerialQueue.async {
+                            if let channel = self.channels.removeValue(forKey: message.channelName!) {
+                                
+                                ActionCableConcurrentQueue.async {
+                                    // Notify Channel
+                                    channel.onMessage(message)
+                                }
+                                
+                                if let callback = self.onChannelUnsubscribed {
+                                    DispatchQueue.main.async(execute: { callback(channel) })
+                                }
+                            }
+                        }
+                    }
+                }
             case .cancelSubscription:
-                if let channel = channels.removeValue(forKey: message.channelName!) {
-                    
-                    // Notify Channel
-                    channel.onMessage(message)
-                    
-                    if let callback = onChannelUnsubscribed {
-                        DispatchQueue.main.async(execute: { callback(channel) })
+                ActionCableSerialQueue.async {
+                    if let channel = self.channels.removeValue(forKey: message.channelName!) {
+                        
+                        ActionCableConcurrentQueue.async {
+                            // Notify Channel
+                            channel.onMessage(message)
+                        }
+                        
+                        if let callback = self.onChannelUnsubscribed {
+                            DispatchQueue.main.async(execute: { callback(channel) })
+                        }
                     }
                 }
             }
