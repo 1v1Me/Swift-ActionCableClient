@@ -38,7 +38,7 @@ internal class JSONSerializer {
             
             identifierDict["channel"] = "\(channel.name)"
             
-            let JSONData = try JSONSerialization.data(withJSONObject: identifierDict, options: JSONSerialization.WritingOptions(rawValue: 0))
+            let JSONData = try JSONSerialization.data(withJSONObject: identifierDict, options: [.sortedKeys])
             guard let identifierString = NSString(data: JSONData, encoding: String.Encoding.utf8.rawValue)
                   else { throw SerializationError.json }
             
@@ -48,14 +48,14 @@ internal class JSONSerializer {
             ] as [String : Any]
             
             if let _ = data {
-                let JSONData = try JSONSerialization.data(withJSONObject: data!, options: JSONSerialization.WritingOptions(rawValue: 0))
+                let JSONData = try JSONSerialization.data(withJSONObject: data!, options: [.sortedKeys])
                 guard let dataString = NSString(data: JSONData, encoding: String.Encoding.utf8.rawValue)
                       else { throw SerializationError.json }
                 
                 commandDict["data"] = dataString
             }
             
-            let CmdJSONData = try JSONSerialization.data(withJSONObject: commandDict, options: JSONSerialization.WritingOptions(rawValue: 0))
+            let CmdJSONData = try JSONSerialization.data(withJSONObject: commandDict, options: [.sortedKeys])
             guard let JSONString = NSString(data: CmdJSONData, encoding: String.Encoding.utf8.rawValue)
                   else { throw SerializationError.json }
             
