@@ -112,28 +112,10 @@ open class Channel: Hashable, Equatable {
         onReceiveActionHooks[action] = handler
     }
     
-    /// Subscript for `action:`.
-    ///
-    /// Send an action to the server.
-    ///
-    /// Note: ActionCable does not give any confirmation or response that an
-    /// action was succcessfully executed or received.
-    ///
-    /// ```swift
-    /// channel['speak'](["message": "Hello, World!"])
-    /// ```
-    ///
-    /// - Parameters:
-    ///     - action: The name of the action (e.g. speak)
-    /// - Returns: `true` if the action was sent.
-  
-    open subscript(name: String) -> (Dictionary<String, Any>) -> Swift.Error? {
-        
-        func executeParams(_ params : Dictionary<String, Any>?) -> Swift.Error?  {
-            return action(name, with: params)
+    open func action(_ name: String, with params: [String: Any]? = nil) {
+        ActionCableSerialQueue.sync {
+            preformAction(name, with: params)
         }
-        
-        return executeParams
     }
     
     /// Send an action.
@@ -153,11 +135,11 @@ open class Channel: Hashable, Equatable {
     /// - Returns: A `TransmitError` if there were any issues sending the
     ///             message.
     @discardableResult
-    open func action(_ name: String, with params: [String: Any]? = nil) -> Swift.Error? {
+    internal func preformAction(_ name: String, with params: [String: Any]? = nil) -> Swift.Error? {
         do {
-          try (client.action(name, on: self, with: params))
-        // Consume the error and return false if the error is a not subscribed
-        // error and we are buffering the actions.
+            try (self.client.action(name, on: self, with: params))
+            // Consume the error and return false if the error is a not subscribed
+            // error and we are buffering the actions.
         } catch TransmitError.notSubscribed where self.shouldBufferActions {
             
             ActionCableSerialQueue.async(execute: {
@@ -180,7 +162,10 @@ open class Channel: Hashable, Equatable {
     /// channel.subscribe()
     /// ```
     open func subscribe() {
-        client.subscribe(self)
+        ActionCableSerialQueue.sync {
+            client.subscribe(self)
+        }
+        
     }
     
     /// Unsubscribe from the channel on the server.
@@ -191,17 +176,19 @@ open class Channel: Hashable, Equatable {
     /// channel.unsubscribe()
     /// ```
     open func unsubscribe() {
-        client.unsubscribe(self)
+        ActionCableSerialQueue.sync {
+            client.unsubscribe(self)
+        }
     }
     
     internal var onReceiveActionHooks: Dictionary<String, OnReceiveClosure> = Dictionary()
     internal unowned var client: ActionCableClient
     internal var actionBuffer: Array<Action> = Array()
-//    public let hashValue: Int = Int(arc4random_uniform(UInt32(Int32.max)))
-
-  public func hash(into hasher: inout Hasher) {
-    hasher.combine( Int(arc4random_uniform(UInt32(Int32.max))) )
-  }
+    //    public let hashValue: Int = Int(arc4random_uniform(UInt32(Int32.max)))
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine( Int(arc4random_uniform(UInt32(Int32.max))) )
+    }
 }
 
 public func ==(lhs: Channel, rhs: Channel) -> Bool {
@@ -243,7 +230,7 @@ extension Channel {
         ActionCableSerialQueue.sync(execute: {() -> Void in
             // Bail out if the parent is gone for whatever reason
             while let action = self.actionBuffer.popLast() {
-                self.action(action.name, with: action.params)
+                self.preformAction(action.name, with: action.params)
             }
         })
     }
@@ -263,7 +250,7 @@ extension Channel {
 
 extension Channel: CustomDebugStringConvertible {
     public var debugDescription: String {
-        return "ActionCable.Channel<\(hashValue)>(name: \"\(self.name)\" subscribed: \(self.isSubscribed))"
+        return "ActionCable.Channel<\(hashValue)>(name: \"\(self.name)\")"
     }
 }
 
