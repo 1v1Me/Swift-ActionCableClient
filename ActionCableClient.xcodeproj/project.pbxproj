@@ -17,6 +17,7 @@
 		108E7D0326651C420026E8F8 /* ActionCableClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 108E7CF826651C420026E8F8 /* ActionCableClient.h */; };
 		108E7D0426651C420026E8F8 /* .gitkeep in Resources */ = {isa = PBXBuildFile; fileRef = 108E7CFA26651C420026E8F8 /* .gitkeep */; };
 		108E7D0526651C420026E8F8 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 108E7CFB26651C420026E8F8 /* Info.plist */; };
+		3AA43B522AD07C8600F90C20 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA43B512AD07C8600F90C20 /* Package.swift */; };
 		86D451461DC31946006A516E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86D451451DC31946006A516E /* Foundation.framework */; };
 		86D451481DC3194F006A516E /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86D451471DC3194F006A516E /* Starscream.framework */; };
 		86D451491DC31954006A516E /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86D451431DC31942006A516E /* Starscream.framework */; };
@@ -47,6 +48,7 @@
 		108E7CF826651C420026E8F8 /* ActionCableClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionCableClient.h; sourceTree = "<group>"; };
 		108E7CFA26651C420026E8F8 /* .gitkeep */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		108E7CFB26651C420026E8F8 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3AA43B512AD07C8600F90C20 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		86D4510D1DC31840006A516E /* ActionCableClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ActionCableClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		86D451331DC3189D006A516E /* ActionCableClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ActionCableClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		86D451431DC31942006A516E /* Starscream.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Starscream.framework; path = "../../../Library/Developer/Xcode/DerivedData/ActionCableClient-dqlkwbqjlfkoovgogjmwviglajzr/Build/Products/Debug-iphonesimulator/Starscream.framework"; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 		86D451031DC31840006A516E = {
 			isa = PBXGroup;
 			children = (
+				3AA43B512AD07C8600F90C20 /* Package.swift */,
 				108E7CEF26651C420026E8F8 /* Source */,
 				86D4510E1DC31840006A516E /* Products */,
 				86D451421DC31942006A516E /* Frameworks */,
@@ -316,6 +319,7 @@
 				108E7D0126651C420026E8F8 /* Channel.swift in Sources */,
 				108E7CFD26651C420026E8F8 /* JSONSerializer.swift in Sources */,
 				108E7CFF26651C420026E8F8 /* ActionCableClient.swift in Sources */,
+				3AA43B522AD07C8600F90C20 /* Package.swift in Sources */,
 				108E7CFC26651C420026E8F8 /* Constants.swift in Sources */,
 				108E7D0226651C420026E8F8 /* RetryHandler.swift in Sources */,
 				108E7CFE26651C420026E8F8 /* Error.swift in Sources */,
